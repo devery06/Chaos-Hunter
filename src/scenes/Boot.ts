@@ -1,0 +1,59 @@
+//viene importato un riferimento a gamedata per poter usare le variabili globali
+import { GameData } from "../GameData";
+
+//creiamo la classe Boot che estende Phaser.Scene
+export default class Boot extends Phaser.Scene {
+
+  //il costruttore richiama il costruttore della classe Phaser.Scene
+  //si usa il metodo super per richiamare il costruttore della classe Phaser.Scene
+
+  constructor() {
+    // il metodo super prende come parametro un oggetto con una chiave key che ha come valore il nome della scena
+    super({
+      key: "Boot",
+    });
+
+  }
+
+  //il metodo init viene chiamato all'inizio della scena
+  //in questo caso non esegue nessuna operazione
+  init() {
+    console.log("Boot init");
+  }
+
+  //il metodo preload viene chiamato dopo il metodo init
+  //nel metodo preload vengono caricati gli assets che servono per il caricamento della scena successiva
+  preload() {
+
+    console.log("Boot preload");
+    //settiamo il colore di sfondo della scena
+    this.cameras.main.setBackgroundColor(GameData.globals.bgColor);
+    //precarichiamo l'immagine del logo
+    this.load.image("logoC", "assets/images/logo/logoC.jpeg");
+    this.load.image("bgC", "assets/images/menu/bgC.png");
+
+    let _graphics: Phaser.GameObjects.Graphics = this.add.graphics();
+
+    _graphics.fillStyle(0xffffff, 1)
+    .fillRoundedRect(0, 0, 800, 100)
+    .generateTexture("platform", 800, 100)
+    .clear()
+
+  }
+
+  //il metodo create viene chiamato dopo il metodo preload
+  create() {
+
+    console.log("Boot create");
+    //fermiamo la scena corrente
+    this.scene.stop("Boot");
+    //richiamiamo il metodo start della scena Preloader per
+    //passare alla scena successiva
+    this.scene.start("Preloader");
+
+    
+
+  }
+
+  
+}
