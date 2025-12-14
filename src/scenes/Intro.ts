@@ -47,16 +47,6 @@ export default class Intro extends Phaser.Scene {
   }
 
   update(time: number, delta: number): void {
-    if (this.input.activePointer.isDown) {
-      console.log("How to Play button is pressed");
-      this.children.each((child) => {
-        if (child instanceof Phaser.GameObjects.Image && (child.texture.key === 'pg_intro' || child.texture.key === 'FinalBoss_intro')) {
-          child.destroy();
-          //console.log("destroyed");
-          this.logoBossPlayer();
-        }
-      });
-    }
   }
   
   create() {
@@ -140,7 +130,8 @@ export default class Intro extends Phaser.Scene {
     .setFontSize(50)
     .setShadow(5, 5, "#000000", 2, false, true)
     .setStroke("#ff0000", 5)
-    .setInteractive();
+    .setInteractive()
+    .setDepth(20);
 
     this._start.on("pointerover", () => {
       this._start
@@ -169,7 +160,8 @@ export default class Intro extends Phaser.Scene {
       .setColor("#CD5C5C")
       .setShadow(5, 5, "#000000", 2, false, true)
       .setStroke("#ff0000", 5)
-      .setInteractive();
+      .setInteractive()
+      .setDepth(20);
 
     this._how2PlayBotton.on("pointerover", () => {
       
@@ -404,7 +396,8 @@ export default class Intro extends Phaser.Scene {
     .setColor("#CD5C5C")
     .setShadow(5, 5, "#000000", 2, false, true)
     .setStroke("#ff0000", 5)
-    .setInteractive();
+    .setInteractive()
+    .setDepth(20);
 
     this._creditsBotton.on("pointerover", () => {
       this._creditsBotton

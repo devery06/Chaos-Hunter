@@ -1,52 +1,57 @@
-import Village from "./Village";
+import Phaser from 'phaser';
 
 export default class GamePlay extends Phaser.Scene {
     private currentLevel: number = 1;
-    private maxLevel: number = 5;
-    create(){
 
+    constructor() {
+        super({ key: "GamePlay" });
     }
 
-    nextLevel(){
-        if (!this.scene.isActive("GamePlay")) {
-            this.scene.launch("GamePlay");
-        }
+    create() {
+        // Appena GamePlay parte, lancia il primo livello
+        this.loadLevel(this.currentLevel);
+    }
 
-        const gameplayScene = this.scene.get("GamePlay");
+    // Questa funzione viene chiamata dalle altre scene (Village, Level1, ecc.)
+    public nextLevel() {
+        this.currentLevel++;
+        this.loadLevel(this.currentLevel);
+    }
 
-        if (gameplayScene && typeof (gameplayScene as any).nextLevel === "function") {
-            (gameplayScene as any).nextLevel();
-        } else {
-            console.error("❌ GamePlay.nextLevel non è accessibile: la scena non è correttamente istanziata");
-            console.log("Tipo:", typeof gameplayScene);
-            console.log("Oggetto:", gameplayScene);
+    private loadLevel(level: number) {
+        console.log("Caricamento livello: " + level);
+        
+        // Ferma le scene precedenti se necessario
+        this.scene.stop("Village");
+        this.scene.stop("Forest");
+        this.scene.stop("Level1");
+        
+        switch(level) {
+            case 1: 
+                this.scene.start("Village");
+                // GamePlay rimane attiva in background
+            break;
+            case 2:
+                this.scene.start("Forest");
+            break;
+            case 3:
+                this.scene.start("Level1");
+                this.scene.launch("Hud");
+                this.scene.bringToTop("Hud");
+            break;
+            case 4:
+                this.scene.start("Village"); // Ritorno al villaggio
+            break;
+            case 5: 
+                this.scene.start("Intro");
+                this.currentLevel = 0; // Reset
+                this.scene.stop("Hud");
+                this.scene.stop(this);
+            break;
         }
     }
 
     update(time: number, delta: number): void {
-        console.log(this.currentLevel);
-        switch(this.currentLevel) {
-            case 1: 
-                this.scene.stop(this);
-                this.scene.start("Village");
-            break;
-            case 2:
-                this.scene.stop(this);
-                this.scene.start("Forest");
-            break;
-            case 3:
-                this.scene.stop(this);
-                this.scene.start("Level1");
-            break;
-            case 4:
-                this.scene.stop(this);
-                this.scene.start("Village");
-            break;
-            case 5: 
-                this.scene.stop(this);
-                this.scene.start("Intro");
-                this.currentLevel = 0;
-            break;
-        }
+        // Non serve logica qui dentro per gestire i cambi scena
     }
 }

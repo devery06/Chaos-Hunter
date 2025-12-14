@@ -71,7 +71,9 @@ export default class Forest extends Phaser.Scene {
             onComplete: () => {
               this.scene.stop(this);  // Ferma la scena attuale
               const gameplay = this.scene.get("GamePlay") as any;
-              gameplay.nextLevel(); 
+              if (gameplay) {
+                gameplay.nextLevel(); // Chiama il metodo che abbiamo corretto sopra
+              }
             },
           });
         }
