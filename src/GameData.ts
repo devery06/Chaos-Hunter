@@ -3,7 +3,7 @@ export let GameData: gameData = {
     gameWidth: 1280,
     gameHeight: 800,
     bgColor: "#f8f8ff",
-    debug: true
+    debug: false,
   },
 
   preloader: {

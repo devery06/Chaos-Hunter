@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 
 export default class GamePlay extends Phaser.Scene {
-    private currentLevel: number = 4;
+    private currentLevel: number = 1;
 
     constructor() {
         super({ key: "GamePlay" });
