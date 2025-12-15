@@ -14,7 +14,7 @@ export default class Arcade extends Phaser.Scene {
   // Stats Player
   private _player_velocity: number = 160;
   private _player_damage: number = 25;
-  private _player_range: number = 190;
+  private _player_range: number = 110;
 
   // Stati Player
   private _player_hit: boolean = false;
@@ -35,21 +35,24 @@ export default class Arcade extends Phaser.Scene {
   // Enemies Containers
   private _enemies: Phaser.Physics.Arcade.Group;
 
-// Sounds & Music
-private _themeMusic: Phaser.Sound.BaseSound;
-private _muteBtn: Phaser.GameObjects.Sprite;
+  // Sounds & Music
+  private _themeMusic: Phaser.Sound.BaseSound;
 
-private _musicGoblinAttack: Phaser.Sound.BaseSound;
-private _musicGoblinHit: Phaser.Sound.BaseSound;
-private _musicGoblinDeath: Phaser.Sound.BaseSound;
-private _musicGoblinWalk: Phaser.Sound.BaseSound;
+  //buttons
+  private _muteBtn: Phaser.GameObjects.Sprite;
+  private _menuBtn: Phaser.GameObjects.Text;
 
-private _musicSkeletonDeath: Phaser.Sound.BaseSound;
-private _musicSkeletonHit: Phaser.Sound.BaseSound;
-private _musicSkeletonWalk: Phaser.Sound.BaseSound;
+  private _musicGoblinAttack: Phaser.Sound.BaseSound;
+  private _musicGoblinHit: Phaser.Sound.BaseSound;
+  private _musicGoblinDeath: Phaser.Sound.BaseSound;
+  private _musicGoblinWalk: Phaser.Sound.BaseSound;
 
-private musicPlayer: Phaser.Sound.BaseSound; 
-private musicSwoosh: Phaser.Sound.BaseSound;
+  private _musicSkeletonDeath: Phaser.Sound.BaseSound;
+  private _musicSkeletonHit: Phaser.Sound.BaseSound;
+  private _musicSkeletonWalk: Phaser.Sound.BaseSound;
+
+  private musicPlayer: Phaser.Sound.BaseSound;
+  private musicSwoosh: Phaser.Sound.BaseSound;
 
   // UI Arcade
   private _healthBar: Phaser.GameObjects.Graphics;
@@ -62,68 +65,83 @@ private musicSwoosh: Phaser.Sound.BaseSound;
   }
 
   createMuteButton() {
-    const startFrame = this.sound.mute ? 0 : 1; 
-    
-    this._muteBtn = this.add.sprite(this.scale.width - 340, 40, 'icon', startFrame)
-      .setScrollFactor(0) 
+    const startFrame = this.sound.mute ? 0 : 1;
+
+    this._muteBtn = this.add
+      .sprite(
+        this.scale.width - (this._menuBtn.width + this._scoreText.width + 100),
+        40,
+        "icon",
+        startFrame
+      )
+      .setScrollFactor(0)
       .setDepth(20000)
       .setScale(0.6)
       .setInteractive({ useHandCursor: true });
-  
-    this._muteBtn.on('pointerdown', () => {
+
+    this._muteBtn.on("pointerdown", () => {
       this.sound.mute = !this.sound.mute;
-      const newFrame = this.sound.mute ? 0 : 1;
+      const newFrame = this.sound.mute ? 1 : 0;
       this._muteBtn.setFrame(newFrame);
     });
   }
 
+  UpdateUI() {
+    this._menuBtn.x = this.scale.width - (this._scoreText.width + 110);
+    this._muteBtn.x =
+      this.scale.width - (this._menuBtn.width + this._scoreText.width + 100);
+  }
+
   loadAudios() {
-    this._musicGoblinAttack = this.sound.add("goblin_attack", { loop: false, volume: 0.5 });
-    this._musicGoblinHit = this.sound.add("goblin_hit", { loop: false, volume: 0.5 });
-    this._musicGoblinDeath = this.sound.add("goblin_death", { loop: false, volume: 0.5 });
-    this._musicGoblinWalk = this.sound.add("goblin_walk", { loop: false, volume: 0.5 });
-    
-    this._musicSkeletonDeath = this.sound.add("skeleton_death", { loop: false, volume: 0.5 });
-    this._musicSkeletonHit = this.sound.add("skeleton_hit", { loop: false, volume: 0.5});
-    this._musicSkeletonWalk = this.sound.add("skeleton_walk", { loop: false, volume: 0.5 });
-    
-    this.musicPlayer = this.sound.add("footstepDirt2", { loop: true, volume: 0.5, rate: .3 });
-    this.musicSwoosh = this.sound.add("metalSwoosh1", { loop: false, volume: 0.7 });
+    this._musicGoblinAttack = this.sound.add("goblin_attack", {
+      loop: false,
+      volume: 0.5,
+    });
+    this._musicGoblinHit = this.sound.add("goblin_hit", {
+      loop: false,
+      volume: 0.5,
+    });
+    this._musicGoblinDeath = this.sound.add("goblin_death", {
+      loop: false,
+      volume: 0.5,
+    });
+    this._musicGoblinWalk = this.sound.add("goblin_walk", {
+      loop: false,
+      volume: 0.5,
+    });
+
+    this._musicSkeletonDeath = this.sound.add("skeleton_death", {
+      loop: false,
+      volume: 0.5,
+    });
+    this._musicSkeletonHit = this.sound.add("skeleton_hit", {
+      loop: false,
+      volume: 0.5,
+    });
+    this._musicSkeletonWalk = this.sound.add("skeleton_walk", {
+      loop: false,
+      volume: 0.5,
+    });
+
+    this.musicPlayer = this.sound.add("footstepDirt2", {
+      loop: true,
+      volume: 0.5,
+      rate: 0.3,
+    });
+    this.musicSwoosh = this.sound.add("metalSwoosh1", {
+      loop: false,
+      volume: 0.7,
+    });
   }
 
   create() {
-    // MENU BUTTON
-    const menuBtn = this.add
-      .text(this.scale.width - 240, 40, "MENU", {
-        fontFamily: "MaleVolentz",
-        fontSize: "30px",
-        color: "#ffffff",
-      })
-      .setOrigin(0.5)
-      .setDepth(1000)
-      .setStroke("#000000", 4)
-      .setScrollFactor(0)
-      .setInteractive({ useHandCursor: true })
-      .on("pointerover", () => {
-        menuBtn.setColor("#ff0000");
-      })
-      .on("pointerout", () => {
-        menuBtn.setColor("#ffffff"); 
-      })
-      .on("pointerdown", () => {
-        this.sound.stopAll();
-        this.scene.stop();
-        if (this.scene.get("Hud").scene.isActive()) {
-          this.scene.stop("Hud");
-        }
-        this.scene.start("Intro"); // Torna al menu
-      });
-
     this.loadAudios();
     this.sound.stopAll();
-    this._themeMusic = this.sound.add("battle_theme", { loop: true, volume: 0.3 });
+    this._themeMusic = this.sound.add("battle_theme", {
+      loop: true,
+      volume: 0.3,
+    });
     this._themeMusic.play();
-    this.createMuteButton();
 
     // 1. Reset Variabili Arcade
     this._score = 0;
@@ -186,13 +204,42 @@ private musicSwoosh: Phaser.Sound.BaseSound;
     this._scoreText = this.add
       .text(1250, 40, "SCORE: 0", {
         fontFamily: "MaleVolentz",
-        fontSize: "35px",
+        fontSize: "36px",
         color: "#ffffff",
       })
       .setOrigin(1, 0.5)
       .setDepth(100)
       .setStroke("#000000", 4);
 
+    // MENU BUTTON
+    console.log("scoreText x position:", this._scoreText.width);
+    this._menuBtn = this.add
+      .text(this.scale.width - (this._scoreText.width + 110), 40, "MENU", {
+        fontFamily: "MaleVolentz",
+        fontSize: "36px",
+        color: "#ffffff",
+      })
+      .setOrigin(0.5)
+      .setDepth(1000)
+      .setStroke("#000000", 4)
+      .setScrollFactor(0)
+      .setInteractive({ useHandCursor: true })
+      .on("pointerover", () => {
+        this._menuBtn.setColor("#ff0000");
+      })
+      .on("pointerout", () => {
+        this._menuBtn.setColor("#ffffff");
+      })
+      .on("pointerdown", () => {
+        this.sound.stopAll();
+        this.scene.stop();
+        if (this.scene.get("Hud").scene.isActive()) {
+          this.scene.stop("Hud");
+        }
+        this.scene.start("Intro"); // Torna al menu
+      });
+
+    this.createMuteButton();
     // 7. Sounds
     this._musicGoblinHit = this.sound.add("goblin_hit", { volume: 0.5 });
     this._musicSkeletonHit = this.sound.add("skeleton_hit", { volume: 0.5 });
@@ -205,7 +252,7 @@ private musicSwoosh: Phaser.Sound.BaseSound;
 
     // 10. Rigenerazione Passiva
     this.time.addEvent({
-      delay: 1000,
+      delay: 1500,
       callback: () => {
         if (this._health > 0 && this._health < this._maxHealth) {
           this._health += 2;
@@ -292,10 +339,9 @@ private musicSwoosh: Phaser.Sound.BaseSound;
   spawnEnemy() {
     let spawnType = Phaser.Math.Between(0, 1);
 
-    // SPAWN MINOTAURO: Solo se score >= 5000 e con probabilità del 5% (MOLTO RARO)
+    // SPAWN MINOTAURO: Solo se score >= 3000 e con probabilità del 7%
     if (this._score >= 3000) {
       if (Phaser.Math.Between(0, 100) < 7) {
-        // 7% di probabilità
         spawnType = 2;
       }
     }
@@ -310,7 +356,7 @@ private musicSwoosh: Phaser.Sound.BaseSound;
     let damage = 20;
     let points = 100;
     let speed = 80;
-    let yPos = 600; // Y standard per Goblin e Scheletri
+    let yPos = 600;
 
     if (spawnType === 0) {
       key = "goblin_walk";
@@ -334,13 +380,17 @@ private musicSwoosh: Phaser.Sound.BaseSound;
       damage = 40;
       points = 500;
       speed = 45;
-      yPos = 450; // ALZATO DI 150PX (Era 600)
+      yPos = 450;
     }
 
     const enemy = this.physics.add.sprite(xPos, yPos, key).setScale(3);
 
+    // --- MODIFICA HITBOX QUI ---
+
     if (name === "minotaur") {
-      enemy.setSize(60, 85).setOffset(40, 45);
+      enemy.setSize(35, 60).setOffset(53, 70);
+    } else if (name === "goblin") {
+      enemy.setSize(15, 20).setOffset(13, 55);
     } else {
       enemy.setSize(30, 35).setOffset(5, 40);
     }
@@ -442,13 +492,17 @@ private musicSwoosh: Phaser.Sound.BaseSound;
     enemy.setData("isAttacking", true);
     enemy.anims.play(`mob_${name}_attack`, true);
     if (name === "goblin" && this._musicGoblinAttack) {
-        this._musicGoblinAttack.play();
-   }
+      this._musicGoblinAttack.play();
+    }
 
     enemy.once("animationcomplete", () => {
       if (enemy.active && !enemy.getData("dead")) {
         const dist = Math.abs(this._player.x - enemy.x);
-        const hitRange = name === "minotaur" ? 120 : 90;
+
+        // RIDOTTO RANGE COLPO NEMICI
+        // Minotauro: 120 -> 90
+        // Altri: 90 -> 50
+        const hitRange = name === "minotaur" ? 90 : 50;
 
         if (dist < hitRange) {
           this.handlePlayerHit(enemy);
@@ -471,7 +525,7 @@ private musicSwoosh: Phaser.Sound.BaseSound;
       enemy.getData("dead")
     )
       return;
-    if(this.musicPlayer && this.musicPlayer.isPlaying) this.musicPlayer.stop();
+    if (this.musicPlayer && this.musicPlayer.isPlaying) this.musicPlayer.stop();
     this._isAttacking = false;
 
     const dmg = enemy.getData("damage");
@@ -521,7 +575,7 @@ private musicSwoosh: Phaser.Sound.BaseSound;
 
     this._isAttacking = true;
     this._player.setVelocityX(0);
-    if(this.musicSwoosh) this.musicSwoosh.play();
+    if (this.musicSwoosh) this.musicSwoosh.play();
 
     const attacks = ["player_attack1", "player_attack2", "player_attack3"];
     this._player.anims.play(attacks[this._player_attack_index], true);
@@ -549,15 +603,11 @@ private musicSwoosh: Phaser.Sound.BaseSound;
         const enemy = child as Phaser.Physics.Arcade.Sprite;
 
         if (enemy.active && !enemy.getData("dead")) {
-          // Hitbox estesa anche verticalmente
+          // FIX HITBOX: Usiamo l'intersezione tra rettangoli (Hitbox Spada vs Corpo Nemico)
           if (
-            Phaser.Geom.Rectangle.ContainsPoint(
+            Phaser.Geom.Intersects.RectangleToRectangle(
               hitBox,
-              new Phaser.Geom.Point(enemy.x, enemy.y)
-            ) ||
-            Phaser.Geom.Rectangle.ContainsPoint(
-              hitBox,
-              new Phaser.Geom.Point(enemy.x, enemy.y - 40)
+              enemy.getBounds()
             )
           ) {
             this.hitEnemy(enemy);
@@ -565,15 +615,15 @@ private musicSwoosh: Phaser.Sound.BaseSound;
         }
         return true;
       });
-    });
 
-    this.time.delayedCall(400, () => {
-      this._isAttacking = false;
+      this.time.delayedCall(400, () => {
+        this._isAttacking = false;
+      });
     });
   }
 
   hitEnemy(enemy: Phaser.Physics.Arcade.Sprite) {
-    // Se morto o INVINCIBILE, esci (Vale anche per il Minotauro ora)
+    // Se morto o INVINCIBILE, esci
     if (enemy.getData("dead") || enemy.getData("invincible")) return;
 
     let hp = enemy.getData("hp");
@@ -582,24 +632,32 @@ private musicSwoosh: Phaser.Sound.BaseSound;
 
     const name = enemy.getData("name");
 
-    // SETTO I FLAG DI HIT E INVINCIBILITÀ (Anche per il boss!)
+    // SETTO I FLAG DI HIT E INVINCIBILITÀ
     enemy.setData("isHit", true);
     enemy.setData("invincible", true);
-    enemy.setData("isAttacking", false);
+
+    // IMPORTANTE: Non fermiamo l'attacco del Minotauro se viene colpito
+    if (name !== "minotaur") {
+      enemy.setData("isAttacking", false);
+    }
 
     if (hp <= 0) {
       enemy.setData("dead", true);
       enemy.setVelocity(0, 0);
       enemy.body.enable = false;
       enemy.anims.play(`mob_${name}_death`, true);
+
       if (name === "goblin") this._musicGoblinDeath.play();
       else if (name === "skeleton") this._musicSkeletonDeath.play();
+
       // DISTRUZIONE BARRA VITA
       const hpBar = (enemy as any).hpBar as Phaser.GameObjects.Graphics;
       if (hpBar) hpBar.destroy();
+
       const points = enemy.getData("points");
       this._score += points;
       this._scoreText.setText("SCORE: " + this._score);
+      this.UpdateUI();
 
       if (this._spawnDelay > this._minSpawnDelay) {
         this._spawnDelay -= 50;
@@ -609,20 +667,37 @@ private musicSwoosh: Phaser.Sound.BaseSound;
         enemy.destroy();
       });
     } else {
-      enemy.anims.play(`mob_${name}_hit`, true);
+      // FIX MINOTAURO:
+      // Se è il minotauro, NON fare play dell'animazione hit (che lo blocca),
+      // ma fallo solo lampeggiare.
+      if (name === "minotaur") {
+        this.tweens.add({
+          targets: enemy,
+          alpha: 0.5,
+          yoyo: true,
+          repeat: 1,
+          duration: 100,
+          onComplete: () => {
+            enemy.setAlpha(1);
+          },
+        });
+      } else {
+        // Per gli altri nemici piccoli, ok l'animazione di hit
+        enemy.anims.play(`mob_${name}_hit`, true);
+        const knockback = 80;
+        enemy.setVelocityX(this._player.flipX ? -knockback : knockback);
+      }
+
       if (name === "goblin") this._musicGoblinHit.play();
       else if (name === "skeleton") this._musicSkeletonHit.play();
-      const knockback = name === "minotaur" ? 20 : 80;
-      enemy.setVelocityX(this._player.flipX ? -knockback : knockback);
 
-      // TEMPO DI RECUPERO DEL NEMICO
-      // Il minotauro recupera leggermente più veloce (400ms) degli altri (500ms) per essere più aggressivo
-      const recoveryTime = name === "minotaur" ? 400 : 500;
+      // TEMPO DI RECUPERO DEL NEMICO (Immortalità temporanea)
+      const recoveryTime = name === "minotaur" ? 500 : 500;
 
       this.time.delayedCall(recoveryTime, () => {
         if (enemy.active && !enemy.getData("dead")) {
           enemy.setData("isHit", false);
-          enemy.setData("invincible", false); // Rimuovi immortalità
+          enemy.setData("invincible", false);
         }
       });
     }
@@ -630,29 +705,31 @@ private musicSwoosh: Phaser.Sound.BaseSound;
 
   playerMovements() {
     if (this._player_hit || this._isAttacking || this._isDashing) {
-        if(this.musicPlayer && this.musicPlayer.isPlaying) this.musicPlayer.stop();
-        return;
+      if (this.musicPlayer && this.musicPlayer.isPlaying)
+        this.musicPlayer.stop();
+      return;
     }
 
     if (this._cursors.left.isDown) {
       this._player.setVelocityX(-this._player_velocity);
       this._player.setFlipX(true);
       this._player.anims.play("player_walk", true);
-      
-      if (this.musicPlayer && !this.musicPlayer.isPlaying) this.musicPlayer.play();
 
+      if (this.musicPlayer && !this.musicPlayer.isPlaying)
+        this.musicPlayer.play();
     } else if (this._cursors.right.isDown) {
       this._player.setVelocityX(this._player_velocity);
       this._player.setFlipX(false);
       this._player.anims.play("player_walk", true);
 
-      if (this.musicPlayer && !this.musicPlayer.isPlaying) this.musicPlayer.play();
-
+      if (this.musicPlayer && !this.musicPlayer.isPlaying)
+        this.musicPlayer.play();
     } else {
       this._player.setVelocityX(0);
       this._player.anims.play("player_idle", true);
-      
-      if(this.musicPlayer && this.musicPlayer.isPlaying) this.musicPlayer.stop();
+
+      if (this.musicPlayer && this.musicPlayer.isPlaying)
+        this.musicPlayer.stop();
     }
   }
 

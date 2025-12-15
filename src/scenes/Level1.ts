@@ -56,10 +56,10 @@ export default class Level1 extends Phaser.Scene {
   // Boss Minotauro
   private _mob_minotaur: Phaser.Physics.Arcade.Sprite;
   private _mob_minotaur_body: Phaser.Physics.Arcade.Body;
-  private _mob_minotaur_health: number = 30;
+  private _mob_minotaur_health: number = 50;
   private _mob_minotaur_damage: number = 35;
   private _mob_minotaur_speed: number = 40;
-  private _mob_minotaur_attack_cooldown: number = 2500;
+  private _mob_minotaur_attack_cooldown: number = 1200;
   private _mob_minotaur_range = 160; 
   private _mob_minotaur_dead: boolean = false;
   private _bossfight: boolean = false;
@@ -89,9 +89,6 @@ export default class Level1 extends Phaser.Scene {
   }
 
   createMuteButton() {
-    // 1. Logica Frame: 
-    // Se è muto (true) -> Frame 0
-    // Se c'è audio (false) -> Frame 1
     const currentFrame = this.sound.mute ? 0 : 1; 
     
     this._muteBtn = this.add.sprite(this.scale.width - 160, 40, 'icon', currentFrame)
@@ -101,14 +98,12 @@ export default class Level1 extends Phaser.Scene {
       .setDepth(1000);
   
     this._muteBtn.on('pointerdown', () => {
-      // 2. Invertiamo lo stato dell'audio
       this.sound.mute = !this.sound.mute;
-      
-      // 3. Aggiorniamo l'icona in base al NUOVO stato
       const newFrame = this.sound.mute ? 1 : 0;
       this._muteBtn.setFrame(newFrame);
     });
   }
+
   createMenuButton() {
     const menuBtn = this.add.text(this.scale.width - 80, 40, "MENU", {
         fontFamily: "MaleVolentz", fontSize: "30px", color: "#ffffff",
@@ -122,6 +117,24 @@ export default class Level1 extends Phaser.Scene {
         if (this.scene.get("GamePlay").scene.isActive()) this.scene.stop("GamePlay");
         this.scene.start("Intro"); 
       });
+  }
+
+  showGameOverUI() {
+    this.add
+      .text(this.scale.width / 2, this.scale.height / 2, "GAME OVER", {
+        fontFamily: "MaleVolentz",
+        fontSize: "100px",
+        color: "#ff0000",
+      })
+      .setOrigin(0.5)
+      .setStroke("#000000", 10)
+      .setDepth(200);
+
+    this.time.delayedCall(4000, () => {
+      this.input.keyboard.enabled = true;
+      this.sound.stopAll();
+      this.scene.start("Intro");
+    });
   }
 
   create() {
@@ -209,6 +222,7 @@ export default class Level1 extends Phaser.Scene {
       
       if (this._bossfight && this._mob_minotaur) {
           this.enemiesMovement(this._mob_minotaur, "minotaur");
+          this.updateBossHealthBar(); // <--- AGGIUNTO: Aggiorna la barra vita del boss
       } 
       
       this.enemiesMovement(this._mob_goblin, "goblin");
@@ -222,6 +236,36 @@ export default class Level1 extends Phaser.Scene {
   }
 
   // --- LOGIC METHODS ---
+
+  updateBossHealthBar() {
+      if (!this._mob_minotaur || !this._mob_minotaur.active) return;
+      
+      const hpBar = (this._mob_minotaur as any).hpBar as Phaser.GameObjects.Graphics;
+      if (hpBar) {
+          hpBar.clear();
+          const maxHp = 50; 
+          const curHp = this._mob_minotaur_health;
+          
+          if (curHp <= 0) {
+              hpBar.destroy();
+              return;
+          }
+
+          const width = 80;
+          const height = 8;
+          const x = this._mob_minotaur.x - width / 2;
+          const y = this._mob_minotaur.y - 80;
+
+          // Sfondo nero
+          hpBar.fillStyle(0x000000, 0.6);
+          hpBar.fillRect(x, y, width, height);
+          
+          // Barra Rossa
+          const hpPercent = Phaser.Math.Clamp(curHp / maxHp, 0, 1);
+          hpBar.fillStyle(0xff0000);
+          hpBar.fillRect(x, y, width * hpPercent, height);
+      }
+  }
 
   checkLevelCompletion() {
       if (this._levelFinished || !this._bossfight) return;
@@ -450,6 +494,7 @@ export default class Level1 extends Phaser.Scene {
       }
       
       if (!_mob.getData("isAttacking") && !_mob.getData("dead")) {
+        // ... Movimento (rimane uguale) ...
         if (this._player.x - _mob.x > this._mob_minotaur_range) {
           _mob.anims.play("mob_" + name + "_walk", true);
           _mob.setFlipX(false);
@@ -464,26 +509,44 @@ export default class Level1 extends Phaser.Scene {
           _mob.setVelocityX(0);
           if (_mob.getData("attackCooldown")) {
             _mob.anims.play("mob_" + name + "_idle", true);
-            if (_mob.flipX) this._mob_minotaur_body.setOffset(45, 45);
-            else this._mob_minotaur_body.setOffset(35, 45);
+            // ... offset idle ...
           } else {
+            // INIZIO ATTACCO
             _mob.setData("attackCooldown", true);
             _mob.setData("isAttacking", true);
             _mob.anims.play("mob_" + name + "_attack", true);
+            
+            // Offset Hitbox durante attacco
             if (_mob.flipX) this._mob_minotaur_body.setOffset(65, 55);
             else this._mob_minotaur_body.setOffset(35, 55);
+
+            // FIX DELAY: Resetta cooldown indipendentemente dall'animazione
+            this.time.delayedCall(this._mob_minotaur_attack_cooldown, () => { 
+                if(_mob.active) _mob.setData("attackCooldown", false); 
+            });
             
             _mob.once("animationcomplete", (anim: Phaser.Animations.Animation) => {
                 if (anim.key == "mob_" + name + "_attack") {
-                  const dist = this._player.x - _mob.x;
-                  const isFacingTarget = (_mob.flipX && dist < 0) || (!_mob.flipX && dist > 0);
-                  const isInRange = Math.abs(dist) < this._mob_minotaur_range + 20; 
                   
-                  if (isFacingTarget && isInRange) {
+                  // --- FIX HITBOX VICINA ---
+                  const dist = this._player.x - _mob.x;
+                  
+                  // Calcoliamo la distanza assoluta (senza segno)
+                  const absDist = Math.abs(dist);
+                  
+                  // Rendi il controllo più permissivo:
+                  // 1. Se sei VICINISSIMO (absDist < 50), ti colpisce SEMPRE (anche se glitchi dentro).
+                  // 2. Altrimenti controlla la direzione come prima.
+                  const isCloseEnough = absDist < 50; 
+                  const isFacingTarget = (_mob.flipX && dist < 0) || (!_mob.flipX && dist > 0);
+                  const isInRange = absDist < this._mob_minotaur_range + 20; 
+                  
+                  if ((isCloseEnough || isFacingTarget) && isInRange) {
                     this.updateHealthBar(this._mob_minotaur_damage);
                   }
-                  this.time.delayedCall(200, () => { _mob.setData("isAttacking", false); });
-                  this.time.delayedCall(this._mob_minotaur_attack_cooldown, () => { _mob.setData("attackCooldown", false); });
+                  
+                  // Reset flag attacco
+                  this.time.delayedCall(200, () => { if(_mob.active) _mob.setData("isAttacking", false); });
                 }
             });
           }
@@ -517,11 +580,14 @@ export default class Level1 extends Phaser.Scene {
                 this._mob_minotaur_dead = true; 
                 this._mob_minotaur.setData("dead", true);
                 if(this._musicSkeletonDeath) this._musicSkeletonDeath.play();
+                // Distruggi barra vita
+                const hpBar = (this._mob_minotaur as any).hpBar as Phaser.GameObjects.Graphics;
+                if(hpBar) hpBar.destroy();
             }
           } else {
             this._mob_minotaur.setData("isAttacking", false);
             this._mob_minotaur.anims.stop();
-            this._mob_minotaur.anims.play("mob_minotaur_hit", true); 
+            //this._mob_minotaur.anims.play("mob_minotaur_hit", true); 
             this._mob_minotaur.setData("isInvincible", true);
             
             this.tweens.add({
@@ -582,6 +648,13 @@ export default class Level1 extends Phaser.Scene {
     this._mob_minotaur.setCollideWorldBounds(true).setGravity(0, 100);
     this._bossfight = true;
     this._mob_minotaur.setData("isInvincible", false);
+    this._mob_minotaur.setData("attackCooldown", false); 
+    this._mob_minotaur.setData("isAttacking", false); 
+
+    // CREO LA BARRA VITA
+    const hpBar = this.add.graphics();
+    hpBar.setDepth(15);
+    (this._mob_minotaur as any).hpBar = hpBar;
   }
 
   checkBossFight(): void {
@@ -659,35 +732,30 @@ export default class Level1 extends Phaser.Scene {
     if(this.musicPlayer && this.musicPlayer.isPlaying) this.musicPlayer.stop(); 
     this._player.setVelocityX(0); 
     
-    // Tenta di riprodurre l'animazione se esiste
     if (this.anims.exists("player_hit")) {
         this._player.anims.play("player_hit", true); 
     } else {
-        // Feedback visivo alternativo (lampeggia rosso) se l'animazione manca
         this._player.setTint(0xff0000);
     }
 
-    // FIX BLOCCAGGIO: Usa un timer invece di aspettare l'animazione
     this.time.delayedCall(500, () => { 
         this._player_hit = false; 
-        this._player.clearTint(); // Rimuove il rosso se c'era
+        this._player.clearTint(); 
     });
   }
 
-  death(): void {
-    if (!this._gameOver) {
-      this._gameOver = true; 
-      this._player.setVelocity(0);
-      if(this.musicPlayer && this.musicPlayer.isPlaying) this.musicPlayer.stop(); 
-      if(this._player.body) this._player.body.enable = false;
-      this._player.anims.stop(); 
-      this._player.play("player_death", true); 
-    }
-    this.time.delayedCall(2000, () => {
-      this.scene.stop(this); 
-      this.scene.stop("Hud"); 
-      this.sound.stopAll();
-      this.scene.start("GameOver"); 
+  death() {
+    if (this._player.anims.currentAnim && this._player.anims.currentAnim.key === "player_death") return;
+
+    this._player.setVelocity(0, 0);
+    this.input.keyboard.enabled = false;
+    
+    if (this._player.body) this._player.body.enable = false;
+    this._player.anims.play("player_death", true);
+    
+    this._player.once("animationcomplete", () => {
+        this.physics.pause();
+        this.showGameOverUI();
     });
   }
 

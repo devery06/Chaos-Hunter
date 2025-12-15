@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 
 export default class GamePlay extends Phaser.Scene {
-    private currentLevel: number = 1;
+    private currentLevel: number = 4;
 
     constructor() {
         super({ key: "GamePlay" });
@@ -46,7 +46,7 @@ export default class GamePlay extends Phaser.Scene {
             break;
             case 6: 
                 this.scene.start("Intro");
-                this.currentLevel = 0; // Reset
+                this.currentLevel = 1; // Reset
                 this.scene.stop("Hud");
                 this.scene.stop(this);
             break;
