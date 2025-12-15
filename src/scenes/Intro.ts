@@ -29,7 +29,7 @@ export default class Intro extends Phaser.Scene {
 
     // 1. Setup Audio
     if (!this.sound.get("themeMenu")) {
-        this._musicTheme = this.sound.add("themeMenu", { loop: true, volume: 0.4 });
+        this._musicTheme = this.sound.add("themeMenu", { loop: true, volume: 0.2 });
         this._musicTheme.play();
     } else if (!this.sound.get("themeMenu").isPlaying) {
         this.sound.get("themeMenu").play();

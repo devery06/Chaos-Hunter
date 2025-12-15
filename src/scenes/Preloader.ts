@@ -16,7 +16,7 @@ export default class Preloader extends Phaser.Scene {
 
   init() {
     console.log("Preloader init");
-    
+        
     this._image = this.add
       .image(
         GameData.preloader.imageX,

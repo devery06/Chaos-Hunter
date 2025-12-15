@@ -38,7 +38,7 @@ export default class Level1 extends Phaser.Scene {
   private _mob_skeleton_damage: number = 20;
   private _mob_skeleton_health: number = 20;
   private _mob_skeleton_speed: number = 40;
-  private _mob_skeleton_attack_cooldown: number = 2000;
+  private _mob_skeleton_attack_cooldown: number = 1200;
   private _mob_skeleton_maxSpawns = 4;
   private _mob_skeleton_min: number = 2;
   private _mob_skeleton_max: number = 5;
@@ -48,7 +48,7 @@ export default class Level1 extends Phaser.Scene {
   private _mob_goblin_damage: number = 30;
   private _mob_goblin_health: number = 15;
   private _mob_goblin_speed: number = 75;
-  private _mob_goblin_attack_cooldown: number = 5000;
+  private _mob_goblin_attack_cooldown: number = 1200;
   private _mob_goblin_maxSpawns = 4;
   private _mob_goblin_min: number = 2;
   private _mob_goblin_max: number = 4;
@@ -59,7 +59,7 @@ export default class Level1 extends Phaser.Scene {
   private _mob_minotaur_health: number = 50;
   private _mob_minotaur_damage: number = 35;
   private _mob_minotaur_speed: number = 40;
-  private _mob_minotaur_attack_cooldown: number = 1200;
+  private _mob_minotaur_attack_cooldown: number = 1800;
   private _mob_minotaur_range = 160; 
   private _mob_minotaur_dead: boolean = false;
   private _bossfight: boolean = false;
@@ -112,37 +112,16 @@ export default class Level1 extends Phaser.Scene {
       .on("pointerout", () => { menuBtn.setColor("#ffffff"); })
       .on("pointerdown", () => {
         this.sound.stopAll();
-        this.scene.stop(); 
-        if (this.scene.get("Hud").scene.isActive()) this.scene.stop("Hud");
-        if (this.scene.get("GamePlay").scene.isActive()) this.scene.stop("GamePlay");
+        this.scene.stop("Hud");
+        this.scene.stop(this);
         this.scene.start("Intro"); 
       });
   }
 
-  showGameOverUI() {
-    this.add
-      .text(this.scale.width / 2, this.scale.height / 2, "GAME OVER", {
-        fontFamily: "MaleVolentz",
-        fontSize: "100px",
-        color: "#ff0000",
-      })
-      .setOrigin(0.5)
-      .setStroke("#000000", 10)
-      .setDepth(200);
-
-    this.time.delayedCall(4000, () => {
-      this.input.keyboard.enabled = true;
-      this.sound.stopAll();
-      this.scene.start("Intro");
-    });
-  }
-
   create() {
-    // --- MUSICA BATTLE ---
     this.sound.stopAll();
-    this.sound.play("battle_theme", { loop: true, volume: 0.3 });
+    this.sound.play("battle_theme", { loop: true, volume: 0.2 });
 
-    // 1. Inizializza Input
     this._cursors = this.input.keyboard.createCursorKeys();
     this._keyX = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
     this._keyDash = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT); 
@@ -155,11 +134,8 @@ export default class Level1 extends Phaser.Scene {
     });
 
     this.createMenuButton();
-    this.sound.stopAll();
-    if (!this.sound.get("battle_theme") || !this.sound.get("battle_theme").isPlaying) this.sound.play("battle_theme", { loop: true, volume: 0.3 });
     this.createMuteButton();
 
-    // 2. RESET VARIABILI
     this._gameOver = false;
     this._bossfight = false;
     this._levelFinished = false; 
@@ -176,7 +152,6 @@ export default class Level1 extends Phaser.Scene {
     this._mob_goblin = [];
     this._mob_goblin_body = [];
 
-    // 3. HUD Connection
     this._hud = this.scene.get("Hud") as Hud;
     if(this._hud) {
         this._hud.events.off("death", this.death, this);
@@ -185,7 +160,6 @@ export default class Level1 extends Phaser.Scene {
         this.events.on("update_health", this._hud.updateHealthBar, this._hud);
     }
 
-    // 4. World Setup
     this._bg1 = this.add.tileSprite(0, 0, 1280, 800, "lvl1_forest").setOrigin(0, 0);
     this.physics.world.setBounds(0, -150, this.scale.width, this.scale.height);
 
@@ -200,7 +174,6 @@ export default class Level1 extends Phaser.Scene {
     this._player_body = this._player.body as Phaser.Physics.Arcade.Body;
     this._player.setCollideWorldBounds(true).setGravity(0, 100);
 
-    // Chaos Event
     this.time.addEvent({
       delay: 12000,
       repeat: -1,
@@ -208,7 +181,7 @@ export default class Level1 extends Phaser.Scene {
     });
 
     this.startSpawners();
-    this.createAnimations();
+    this.createAnimations(); 
 
     this.events.emit("level1_ready");
   }
@@ -222,7 +195,7 @@ export default class Level1 extends Phaser.Scene {
       
       if (this._bossfight && this._mob_minotaur) {
           this.enemiesMovement(this._mob_minotaur, "minotaur");
-          this.updateBossHealthBar(); // <--- AGGIUNTO: Aggiorna la barra vita del boss
+          this.updateBossHealthBar(); 
       } 
       
       this.enemiesMovement(this._mob_goblin, "goblin");
@@ -234,8 +207,6 @@ export default class Level1 extends Phaser.Scene {
       this.checkLevelCompletion();
     }
   }
-
-  // --- LOGIC METHODS ---
 
   updateBossHealthBar() {
       if (!this._mob_minotaur || !this._mob_minotaur.active) return;
@@ -256,11 +227,9 @@ export default class Level1 extends Phaser.Scene {
           const x = this._mob_minotaur.x - width / 2;
           const y = this._mob_minotaur.y - 80;
 
-          // Sfondo nero
           hpBar.fillStyle(0x000000, 0.6);
           hpBar.fillRect(x, y, width, height);
           
-          // Barra Rossa
           const hpPercent = Phaser.Math.Clamp(curHp / maxHp, 0, 1);
           hpBar.fillStyle(0xff0000);
           hpBar.fillRect(x, y, width * hpPercent, height);
@@ -393,7 +362,7 @@ export default class Level1 extends Phaser.Scene {
   }
 
   spawnSingleGoblin(x: number, y: number, isFalling: boolean) {
-      const goblin = this.physics.add.sprite(x, y, "goblin_walk").setScale(3).setOffset(0, 40);
+      const goblin = this.physics.add.sprite(x, y, "goblin_walk").setScale(3).setOffset(0, 50);
       const goblinBody = goblin.body as Phaser.Physics.Arcade.Body;
       goblinBody.setSize(40, 35);
       goblin.setCollideWorldBounds(true).setGravity(0, 100);
@@ -463,11 +432,15 @@ export default class Level1 extends Phaser.Scene {
         mob.once("animationcomplete", (anim: Phaser.Animations.Animation) => {
             if (anim.key == "mob_" + name + "_attack") {
                 mob.setData("attackCooldown", true); 
+                
                 const dist = this._player.x - mob.x;
+                const absDist = Math.abs(dist);
+
                 const hitRight = !mob.flipX && dist > 0 && dist < 110;
                 const hitLeft = mob.flipX && dist < 0 && dist > -110;
+                const isCloseContact = absDist < 50; 
                 
-                if (hitRight || hitLeft) {
+                if (hitRight || hitLeft || isCloseContact) {
                     this.updateHealthBar(mob.getData("damage")); 
                     
                     if(name == 'goblin') this._musicGoblinHit.play();
@@ -489,12 +462,13 @@ export default class Level1 extends Phaser.Scene {
       this._mob_minotaur_body = _mob.body as Phaser.Physics.Arcade.Body;
 
       if (_mob.getData("isInvincible")) {
-          _mob.setVelocityX(0);
-          return;
+          // Nota: Non blocchiamo il movimento qui per evitare stun-lock
+          // Se vuoi che si muova anche da invincibile, rimuovi questo blocco
+          // ma per ora lo lasciamo per il lampeggio. 
+          // La chiave è che NON fermiamo l'animazione di attacco sotto.
       }
       
       if (!_mob.getData("isAttacking") && !_mob.getData("dead")) {
-        // ... Movimento (rimane uguale) ...
         if (this._player.x - _mob.x > this._mob_minotaur_range) {
           _mob.anims.play("mob_" + name + "_walk", true);
           _mob.setFlipX(false);
@@ -509,34 +483,24 @@ export default class Level1 extends Phaser.Scene {
           _mob.setVelocityX(0);
           if (_mob.getData("attackCooldown")) {
             _mob.anims.play("mob_" + name + "_idle", true);
-            // ... offset idle ...
+            if (_mob.flipX) this._mob_minotaur_body.setOffset(45, 45);
+            else this._mob_minotaur_body.setOffset(35, 45);
           } else {
-            // INIZIO ATTACCO
             _mob.setData("attackCooldown", true);
             _mob.setData("isAttacking", true);
             _mob.anims.play("mob_" + name + "_attack", true);
             
-            // Offset Hitbox durante attacco
             if (_mob.flipX) this._mob_minotaur_body.setOffset(65, 55);
             else this._mob_minotaur_body.setOffset(35, 55);
 
-            // FIX DELAY: Resetta cooldown indipendentemente dall'animazione
             this.time.delayedCall(this._mob_minotaur_attack_cooldown, () => { 
                 if(_mob.active) _mob.setData("attackCooldown", false); 
             });
             
             _mob.once("animationcomplete", (anim: Phaser.Animations.Animation) => {
                 if (anim.key == "mob_" + name + "_attack") {
-                  
-                  // --- FIX HITBOX VICINA ---
                   const dist = this._player.x - _mob.x;
-                  
-                  // Calcoliamo la distanza assoluta (senza segno)
                   const absDist = Math.abs(dist);
-                  
-                  // Rendi il controllo più permissivo:
-                  // 1. Se sei VICINISSIMO (absDist < 50), ti colpisce SEMPRE (anche se glitchi dentro).
-                  // 2. Altrimenti controlla la direzione come prima.
                   const isCloseEnough = absDist < 50; 
                   const isFacingTarget = (_mob.flipX && dist < 0) || (!_mob.flipX && dist > 0);
                   const isInRange = absDist < this._mob_minotaur_range + 20; 
@@ -545,7 +509,6 @@ export default class Level1 extends Phaser.Scene {
                     this.updateHealthBar(this._mob_minotaur_damage);
                   }
                   
-                  // Reset flag attacco
                   this.time.delayedCall(200, () => { if(_mob.active) _mob.setData("isAttacking", false); });
                 }
             });
@@ -556,20 +519,28 @@ export default class Level1 extends Phaser.Scene {
 
   checkHit(_mob: Array<Phaser.Physics.Arcade.Sprite> | Phaser.Physics.Arcade.Sprite, name: string): void {
     if (!Array.isArray(_mob)) {
-      // --- BOSS HIT LOGIC ---
+      // --- BOSS (MINOTAURO) HIT LOGIC ---
       if(this._mob_minotaur.getData("isInvincible")) return;
 
-      const distX = Math.abs(this._player.x - _mob.x);
+      const distX = this._mob_minotaur.x - this._player.x;
       const distY = Math.abs(this._player.y - _mob.y);
       const verticalHit = distY < 100; 
 
-      if (
-        ((this._player.flipX == true && this._player.x - _mob.x < this._player_range && this._player.x - _mob.x > -this._player_range) ||
-        (this._player.flipX == false && _mob.x - this._player.x < this._player_range && _mob.x - this._player.x > -this._player_range))
-        && verticalHit
-      ) {
+      // FIX DIREZIONALE: Colpisci solo se il nemico è davanti
+      const hitBoxPadding = 30; // Margine per colpire se sono "dentro" di te
+      const isFacingRight = !this._player.flipX;
+      const isFacingLeft = this._player.flipX;
+      
+      const isInFront = (isFacingRight && distX > -hitBoxPadding) || (isFacingLeft && distX < hitBoxPadding);
+      
+      // Controllo distanza standard
+      const distanceCheck = Math.abs(distX) < this._player_range;
+
+      if (isInFront && distanceCheck && verticalHit) {
         if (!this._mob_minotaur.getData("dead")) {
-          this._mob_minotaur.setVelocityX(0);
+          // NOTA: NON fermiamo la velocità o l'animazione qui per evitare stun-lock
+          // this._mob_minotaur.setVelocityX(0); <--- RIMOSSO
+
           this._mob_minotaur_health -= this._player_damage; 
           
           if (this._mob_minotaur_health <= 0) {
@@ -580,14 +551,14 @@ export default class Level1 extends Phaser.Scene {
                 this._mob_minotaur_dead = true; 
                 this._mob_minotaur.setData("dead", true);
                 if(this._musicSkeletonDeath) this._musicSkeletonDeath.play();
-                // Distruggi barra vita
                 const hpBar = (this._mob_minotaur as any).hpBar as Phaser.GameObjects.Graphics;
                 if(hpBar) hpBar.destroy();
             }
           } else {
-            this._mob_minotaur.setData("isAttacking", false);
-            this._mob_minotaur.anims.stop();
-            //this._mob_minotaur.anims.play("mob_minotaur_hit", true); 
+            // FIX STUN-LOCK:
+            // Rimosso anims.stop() e anims.play("hit").
+            // Il boss continua quello che sta facendo, ma lampeggia.
+            
             this._mob_minotaur.setData("isInvincible", true);
             
             this.tweens.add({
@@ -610,15 +581,20 @@ export default class Level1 extends Phaser.Scene {
         }
       }
     } else {
+      // --- NEMICI NORMALI HIT LOGIC ---
       _mob.forEach((mob) => {
+        const distX = mob.x - this._player.x;
         const distY = Math.abs(this._player.y - mob.y);
         const verticalHit = distY < 100;
 
-        if (
-          ((this._player.flipX == true && this._player.x - mob.x < this._player_range && this._player.x - mob.x > -this._player_range) ||
-          (this._player.flipX == false && mob.x - this._player.x < this._player_range && mob.x - this._player.x > -this._player_range))
-          && verticalHit
-        ) {
+        // FIX DIREZIONALE ANCHE PER I MOB
+        const hitBoxPadding = 30;
+        const isFacingRight = !this._player.flipX;
+        const isFacingLeft = this._player.flipX;
+        const isInFront = (isFacingRight && distX > -hitBoxPadding) || (isFacingLeft && distX < hitBoxPadding);
+        const distanceCheck = Math.abs(distX) < this._player_range;
+
+        if (isInFront && distanceCheck && verticalHit) {
           mob.setVelocityX(0);
           if (!mob.getData("dead")) {
             (mob as any).health -= this._player_damage; 
@@ -651,7 +627,6 @@ export default class Level1 extends Phaser.Scene {
     this._mob_minotaur.setData("attackCooldown", false); 
     this._mob_minotaur.setData("isAttacking", false); 
 
-    // CREO LA BARRA VITA
     const hpBar = this.add.graphics();
     hpBar.setDepth(15);
     (this._mob_minotaur as any).hpBar = hpBar;
@@ -714,6 +689,7 @@ export default class Level1 extends Phaser.Scene {
 
     const attacks = ["player_attack1", "player_attack2", "player_attack3"];
     this._player.anims.play(attacks[this._player_attack], true);
+    
     this._player_attack = (this._player_attack + 1) % 3; 
     this.time.delayedCall(500, () => { this._isAttacking = false; });
     if (this._bossfight) this.checkHit(this._mob_minotaur, "");
@@ -728,15 +704,18 @@ export default class Level1 extends Phaser.Scene {
   }
 
   hit(): void {
+    if (this._player_invicibility || this._gameOver) return;
+
     this._player_hit = true; 
     if(this.musicPlayer && this.musicPlayer.isPlaying) this.musicPlayer.stop(); 
+    
     this._player.setVelocityX(0); 
     
     if (this.anims.exists("player_hit")) {
         this._player.anims.play("player_hit", true); 
-    } else {
-        this._player.setTint(0xff0000);
     }
+    
+    this._player.setTint(0xff0000);
 
     this.time.delayedCall(500, () => { 
         this._player_hit = false; 
@@ -745,17 +724,26 @@ export default class Level1 extends Phaser.Scene {
   }
 
   death() {
-    if (this._player.anims.currentAnim && this._player.anims.currentAnim.key === "player_death") return;
+    if (this._gameOver) return;
+    this._gameOver = true; 
 
     this._player.setVelocity(0, 0);
     this.input.keyboard.enabled = false;
     
+    this.scene.stop("Hud");
+
     if (this._player.body) this._player.body.enable = false;
+    
+    this._player.anims.stop();
     this._player.anims.play("player_death", true);
     
     this._player.once("animationcomplete", () => {
         this.physics.pause();
-        this.showGameOverUI();
+        this.time.delayedCall(2000, () => {
+            this.sound.stopAll();
+            this.scene.stop(this); 
+            this.scene.start("GameOver");
+        });
     });
   }
 
@@ -772,6 +760,14 @@ export default class Level1 extends Phaser.Scene {
   }
 
   createAnimations() {
+    this.anims.create({ key: "player_idle", frames: this.anims.generateFrameNumbers("pg_lvl1", { start: 0, end: 7 }), frameRate: 4, repeat: -1 });
+    this.anims.create({ key: "player_walk", frames: this.anims.generateFrameNumbers("pg_lvl1", { start: 57, end: 63 }), frameRate: 8, repeat: -1 });
+    this.anims.create({ key: "player_attack1", frames: this.anims.generateFrameNumbers("pg_lvl1", { start: 8, end: 11 }), frameRate: 10, repeat: 0 });
+    this.anims.create({ key: "player_attack2", frames: this.anims.generateFrameNumbers("pg_lvl1", { start: 16, end: 19 }), frameRate: 10, repeat: 0 });
+    this.anims.create({ key: "player_attack3", frames: this.anims.generateFrameNumbers("pg_lvl1", { start: 24, end: 27 }), frameRate: 10, repeat: 0 });
+    this.anims.create({ key: "player_hit", frames: this.anims.generateFrameNumbers("pg_lvl1", { start: 64, end: 67 }), frameRate: 10, repeat: 0 });
+    this.anims.create({ key: "player_death", frames: this.anims.generateFrameNumbers("pg_lvl1", { start: 32, end: 37 }), frameRate: 6, repeat: 0 });
+
     this.anims.create({ key: "mob_goblin_idle", frames: this.anims.generateFrameNumbers("goblin_idle", { start: 0, end: 3 }), frameRate: 4, repeat: -1 });
     this.anims.create({ key: "mob_goblin_walk", frames: this.anims.generateFrameNumbers("goblin_walk", { start: 0, end: 7 }), frameRate: 10, repeat: -1 });
     this.anims.create({ key: "mob_goblin_attack", frames: this.anims.generateFrameNumbers("goblin_attack1", { start: 0, end: 7 }), frameRate: 10, repeat: 0 });

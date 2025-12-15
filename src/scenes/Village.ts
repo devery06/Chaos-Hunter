@@ -193,7 +193,7 @@ export default class Village extends Phaser.Scene {
 
     this.sound.stopAll(); 
 
-    if (!this.sound.get("village_theme") || !this.sound.get("village_theme").isPlaying) this.sound.play("village_theme", { loop: true, volume: 0.4 });
+    if (!this.sound.get("village_theme") || !this.sound.get("village_theme").isPlaying) this.sound.play("village_theme", { loop: true, volume: 0.2 });
     this.createMuteButton();
 
     // --- SETUP TESTI (Nuovo Stile Grigio/Trasparente) ---

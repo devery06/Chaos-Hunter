@@ -14,7 +14,7 @@ export default class Arcade extends Phaser.Scene {
   // Stats Player
   private _player_velocity: number = 160;
   private _player_damage: number = 25;
-  private _player_range: number = 110;
+  private _player_range: number = 60;
 
   // Stati Player
   private _player_hit: boolean = false;
@@ -139,7 +139,7 @@ export default class Arcade extends Phaser.Scene {
     this.sound.stopAll();
     this._themeMusic = this.sound.add("battle_theme", {
       loop: true,
-      volume: 0.3,
+      volume: 0.2,
     });
     this._themeMusic.play();
 
@@ -340,8 +340,8 @@ export default class Arcade extends Phaser.Scene {
     let spawnType = Phaser.Math.Between(0, 1);
 
     // SPAWN MINOTAURO: Solo se score >= 3000 e con probabilità del 7%
-    if (this._score >= 3000) {
-      if (Phaser.Math.Between(0, 100) < 7) {
+    if (this._score >= 0) {
+      if (Phaser.Math.Between(0, 100) < 90) {
         spawnType = 2;
       }
     }
@@ -388,13 +388,12 @@ export default class Arcade extends Phaser.Scene {
     // --- MODIFICA HITBOX QUI ---
 
     if (name === "minotaur") {
-      enemy.setSize(35, 60).setOffset(53, 70);
+      enemy.setSize(35, 60).setOffset(45, 60);
     } else if (name === "goblin") {
-      enemy.setSize(15, 20).setOffset(13, 55);
+      enemy.setSize(15, 20).setOffset(70, 75);
     } else {
-      enemy.setSize(30, 35).setOffset(5, 40);
+      enemy.setSize(30, 35).setOffset(14, 14);
     }
-
     enemy.setCollideWorldBounds(true).setGravity(0, 100);
 
     // DATI STATISTICHE
@@ -473,7 +472,7 @@ export default class Arcade extends Phaser.Scene {
     const name = enemy.getData("name");
     const speed = enemy.getData("speed");
 
-    const attackRange = name === "minotaur" ? 80 : 60;
+    const attackRange = name === "minotaur" ? 90 : 60;
 
     if (Math.abs(dist) > attackRange) {
       enemy.setVelocityX(dist > 0 ? speed : -speed);
@@ -499,10 +498,7 @@ export default class Arcade extends Phaser.Scene {
       if (enemy.active && !enemy.getData("dead")) {
         const dist = Math.abs(this._player.x - enemy.x);
 
-        // RIDOTTO RANGE COLPO NEMICI
-        // Minotauro: 120 -> 90
-        // Altri: 90 -> 50
-        const hitRange = name === "minotaur" ? 90 : 50;
+        const hitRange = name === "minotaur" ? 120 : 90;
 
         if (dist < hitRange) {
           this.handlePlayerHit(enemy);
@@ -586,30 +582,23 @@ export default class Arcade extends Phaser.Scene {
 
       const range = this._player_range;
       const hitBox = this._player.flipX
-        ? new Phaser.Geom.Rectangle(
-            this._player.x - range,
-            this._player.y - 60,
-            range,
-            120
-          )
-        : new Phaser.Geom.Rectangle(
-            this._player.x,
-            this._player.y - 60,
-            range,
-            120
-          );
+        ? new Phaser.Geom.Rectangle(this._player.x - range, this._player.y - 60, range, 120)
+        : new Phaser.Geom.Rectangle(this._player.x, this._player.y - 60, range, 120);
 
       this._enemies.children.each((child) => {
         const enemy = child as Phaser.Physics.Arcade.Sprite;
 
         if (enemy.active && !enemy.getData("dead")) {
-          // FIX HITBOX: Usiamo l'intersezione tra rettangoli (Hitbox Spada vs Corpo Nemico)
-          if (
-            Phaser.Geom.Intersects.RectangleToRectangle(
-              hitBox,
-              enemy.getBounds()
-            )
-          ) {
+          // 1. Controllo Collisione Fisica
+          const isOverlapping = Phaser.Geom.Intersects.RectangleToRectangle(hitBox, enemy.getBounds());
+          
+          // 2. Controllo Direzione (FIX: Evita colpi dietro la schiena)
+          const dist = enemy.x - this._player.x;
+          // Se guardo a SX (flipX), nemico deve essere a SX (dist < 10)
+          // Se guardo a DX (!flipX), nemico deve essere a DX (dist > -10)
+          const isInFront = (this._player.flipX && dist < 10) || (!this._player.flipX && dist > -10);
+
+          if (isOverlapping && isInFront) {
             this.hitEnemy(enemy);
           }
         }
@@ -692,7 +681,7 @@ export default class Arcade extends Phaser.Scene {
       else if (name === "skeleton") this._musicSkeletonHit.play();
 
       // TEMPO DI RECUPERO DEL NEMICO (Immortalità temporanea)
-      const recoveryTime = name === "minotaur" ? 500 : 500;
+      const recoveryTime = name === "minotaur" ? 800 : 500;
 
       this.time.delayedCall(recoveryTime, () => {
         if (enemy.active && !enemy.getData("dead")) {
