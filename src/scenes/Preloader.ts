@@ -54,6 +54,9 @@ export default class Preloader extends Phaser.Scene {
 
   loadAssets(): void {
 
+    this.load.audio("battle_theme", "assets/sounds/Theme/Danger_Zone.wav");
+    this.load.audio("village_theme", "assets/sounds/Theme/Peaceful_Village.mp3");
+
     this.load.on("start", () => { });
 
     this.load.on("fileprogress", (file: any, value: any) => {

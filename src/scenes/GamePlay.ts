@@ -28,21 +28,23 @@ export default class GamePlay extends Phaser.Scene {
         
         switch(level) {
             case 1: 
-                this.scene.start("Village");
-                // GamePlay rimane attiva in background
+                this.scene.start("Village"); // Primo ingresso nel villaggio
             break;
             case 2:
-                this.scene.start("Forest");
+                this.scene.start("Forest"); // Scopre che il figlio è morto
             break;
-            case 3:
-                this.scene.start("Level1");
+            case 3: 
+            this.scene.start("Village"); // Parla con il fabbro e parte nella foresta
+            break;
+            case 4:
+                this.scene.start("Level1"); // Va nella foresta ed uccide alcuni figli del chaos
                 this.scene.launch("Hud");
                 this.scene.bringToTop("Hud");
             break;
-            case 4:
+            case 5:
                 this.scene.start("Village"); // Ritorno al villaggio
             break;
-            case 5: 
+            case 6: 
                 this.scene.start("Intro");
                 this.currentLevel = 0; // Reset
                 this.scene.stop("Hud");

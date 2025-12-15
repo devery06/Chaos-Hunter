@@ -9,6 +9,36 @@ export default class Forest extends Phaser.Scene {
   private _player: Phaser.GameObjects.Sprite;
 
   create() {
+        // MENU BUTTON
+        const menuBtn = this.add
+        .text(this.scale.width - 80, 40, "MENU", {
+          fontFamily: "MaleVolentz",
+          fontSize: "30px",
+          color: "#ffffff",
+        })
+        .setOrigin(0.5)
+        .setDepth(1000)
+        .setStroke("#000000", 4)
+        .setScrollFactor(0)
+        .setInteractive({ useHandCursor: true })
+        .on("pointerover", () => {
+          menuBtn.setColor("#ff0000");
+        })
+        .on("pointerout", () => {
+          menuBtn.setColor("#ffffff"); 
+        })
+        .on("pointerdown", () => {
+          this.sound.stopAll();
+          this.scene.stop();
+          if (this.scene.get("Hud").scene.isActive()) {
+            this.scene.stop("Hud");
+          }
+          if (this.scene.get("GamePlay").scene.isActive()) {
+            this.scene.stop("GamePlay");
+          }
+          this.scene.start("Intro"); // Torna al menu
+        });
+
     this.cameras.main.setBackgroundColor(0x000000);
 
     this._bg = this.add

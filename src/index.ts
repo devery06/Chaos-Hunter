@@ -11,6 +11,7 @@ import Village from "./scenes/Village";
 import Forest from "./scenes/Forest";
 import PausedScene from "./scenes/Paused";
 import Level1 from "./scenes/Level1";
+import Arcade from "./scenes/Arcade";
 
 //importiamo GameData che contiene i valori globali del gioco
 import { GameData } from "./GameData";
@@ -45,7 +46,8 @@ window.addEventListener("load", () => {
       Village,
       Forest,
       PausedScene,
-      Level1
+      Level1,
+      Arcade
     ],
     physics: {
       default: "arcade",
