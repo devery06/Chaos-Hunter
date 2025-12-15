@@ -133,6 +133,9 @@ export default class Level1 extends Phaser.Scene {
       this.scene.launch('Paused'); 
     });
 
+    this.input.keyboard.enabled = true; // Riattiva la tastiera
+    this.physics.resume(); // Riattiva la fisica se era in pausa
+
     this.createMenuButton();
     this.createMuteButton();
 

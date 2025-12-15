@@ -14,7 +14,7 @@ export default class Arcade extends Phaser.Scene {
   // Stats Player
   private _player_velocity: number = 160;
   private _player_damage: number = 25;
-  private _player_range: number = 60;
+  private _player_range: number = 90; // Range ridotto
 
   // Stati Player
   private _player_hit: boolean = false;
@@ -180,8 +180,9 @@ export default class Arcade extends Phaser.Scene {
     this._player = this.physics.add
       .sprite(100, 660, "pg_lvl1")
       .setScale(3)
-      .setSize(40, 55)
-      .setOffset(57, 66)
+      // Hitbox Player stretta
+      .setSize(25, 50)
+      .setOffset(65, 78)
       .setDepth(10);
 
     this._player.setCollideWorldBounds(true).setGravity(0, 100);
@@ -212,7 +213,6 @@ export default class Arcade extends Phaser.Scene {
       .setStroke("#000000", 4);
 
     // MENU BUTTON
-    console.log("scoreText x position:", this._scoreText.width);
     this._menuBtn = this.add
       .text(this.scale.width - (this._scoreText.width + 110), 40, "MENU", {
         fontFamily: "MaleVolentz",
@@ -339,9 +339,8 @@ export default class Arcade extends Phaser.Scene {
   spawnEnemy() {
     let spawnType = Phaser.Math.Between(0, 1);
 
-    // SPAWN MINOTAURO: Solo se score >= 3000 e con probabilità del 7%
     if (this._score >= 0) {
-      if (Phaser.Math.Between(0, 100) < 90) {
+      if (Phaser.Math.Between(0, 100) < 10) { // 10% chance Minotauro
         spawnType = 2;
       }
     }
@@ -349,7 +348,6 @@ export default class Arcade extends Phaser.Scene {
     const side = Phaser.Math.Between(0, 1);
     let xPos = side === 0 ? -100 : 1380;
 
-    // Variabili Default
     let key = "goblin_walk";
     let name = "goblin";
     let hp = 50;
@@ -385,18 +383,17 @@ export default class Arcade extends Phaser.Scene {
 
     const enemy = this.physics.add.sprite(xPos, yPos, key).setScale(3);
 
-    // --- MODIFICA HITBOX QUI ---
-
+    // --- HITBOX OTTIMIZZATE (Strette) ---
     if (name === "minotaur") {
-      enemy.setSize(35, 60).setOffset(45, 60);
+      enemy.setSize(30, 45).setOffset(50, 80);
     } else if (name === "goblin") {
-      enemy.setSize(15, 20).setOffset(70, 75);
+      enemy.setSize(16, 25).setOffset(14, 60);
     } else {
-      enemy.setSize(30, 35).setOffset(14, 14);
+      enemy.setSize(18, 40).setOffset(23, 45);
     }
+    
     enemy.setCollideWorldBounds(true).setGravity(0, 100);
 
-    // DATI STATISTICHE
     enemy.setData("name", name);
     enemy.setData("hp", hp);
     enemy.setData("maxHp", hp);
@@ -404,13 +401,11 @@ export default class Arcade extends Phaser.Scene {
     enemy.setData("damage", damage);
     enemy.setData("points", points);
 
-    // DATI STATO
     enemy.setData("isAttacking", false);
     enemy.setData("isHit", false);
     enemy.setData("invincible", false);
     enemy.setData("dead", false);
 
-    // CREAZIONE BARRA VITA
     const hpBar = this.add.graphics();
     hpBar.setDepth(15);
     (enemy as any).hpBar = hpBar;
@@ -497,16 +492,23 @@ export default class Arcade extends Phaser.Scene {
     enemy.once("animationcomplete", () => {
       if (enemy.active && !enemy.getData("dead")) {
         const dist = Math.abs(this._player.x - enemy.x);
-
         const hitRange = name === "minotaur" ? 120 : 90;
 
-        if (dist < hitRange) {
+        if (dist < 50 || dist < hitRange) {
           this.handlePlayerHit(enemy);
         }
       }
 
-      const delay = name === "minotaur" ? 1500 : 800;
-      this.time.delayedCall(delay, () => {
+      // --- LOGICA IDLE DOPO ATTACCO ---
+      // Invece di liberarlo subito, facciamo partire l'Idle e un timer
+      if(enemy.active && !enemy.getData("dead")) {
+          enemy.anims.play(`mob_${name}_idle`, true);
+      }
+
+      // Tempo in cui sta fermo dopo aver attaccato (Cooldown)
+      const cooldown = name === "minotaur" ? 2000 : 800; // 2 secondi per il boss
+
+      this.time.delayedCall(cooldown, () => {
         if (enemy.active) enemy.setData("isAttacking", false);
       });
     });
@@ -589,13 +591,10 @@ export default class Arcade extends Phaser.Scene {
         const enemy = child as Phaser.Physics.Arcade.Sprite;
 
         if (enemy.active && !enemy.getData("dead")) {
-          // 1. Controllo Collisione Fisica
           const isOverlapping = Phaser.Geom.Intersects.RectangleToRectangle(hitBox, enemy.getBounds());
           
-          // 2. Controllo Direzione (FIX: Evita colpi dietro la schiena)
           const dist = enemy.x - this._player.x;
-          // Se guardo a SX (flipX), nemico deve essere a SX (dist < 10)
-          // Se guardo a DX (!flipX), nemico deve essere a DX (dist > -10)
+          // Controllo direzionale (FIX)
           const isInFront = (this._player.flipX && dist < 10) || (!this._player.flipX && dist > -10);
 
           if (isOverlapping && isInFront) {
@@ -612,7 +611,6 @@ export default class Arcade extends Phaser.Scene {
   }
 
   hitEnemy(enemy: Phaser.Physics.Arcade.Sprite) {
-    // Se morto o INVINCIBILE, esci
     if (enemy.getData("dead") || enemy.getData("invincible")) return;
 
     let hp = enemy.getData("hp");
@@ -621,11 +619,10 @@ export default class Arcade extends Phaser.Scene {
 
     const name = enemy.getData("name");
 
-    // SETTO I FLAG DI HIT E INVINCIBILITÀ
     enemy.setData("isHit", true);
     enemy.setData("invincible", true);
 
-    // IMPORTANTE: Non fermiamo l'attacco del Minotauro se viene colpito
+    // FIX: Non bloccare l'attacco del Minotauro se viene colpito
     if (name !== "minotaur") {
       enemy.setData("isAttacking", false);
     }
@@ -639,7 +636,6 @@ export default class Arcade extends Phaser.Scene {
       if (name === "goblin") this._musicGoblinDeath.play();
       else if (name === "skeleton") this._musicSkeletonDeath.play();
 
-      // DISTRUZIONE BARRA VITA
       const hpBar = (enemy as any).hpBar as Phaser.GameObjects.Graphics;
       if (hpBar) hpBar.destroy();
 
@@ -656,10 +652,8 @@ export default class Arcade extends Phaser.Scene {
         enemy.destroy();
       });
     } else {
-      // FIX MINOTAURO:
-      // Se è il minotauro, NON fare play dell'animazione hit (che lo blocca),
-      // ma fallo solo lampeggiare.
       if (name === "minotaur") {
+        // Solo lampeggio per minotauro
         this.tweens.add({
           targets: enemy,
           alpha: 0.5,
@@ -671,7 +665,7 @@ export default class Arcade extends Phaser.Scene {
           },
         });
       } else {
-        // Per gli altri nemici piccoli, ok l'animazione di hit
+        // Animazione hit per gli altri
         enemy.anims.play(`mob_${name}_hit`, true);
         const knockback = 80;
         enemy.setVelocityX(this._player.flipX ? -knockback : knockback);
@@ -680,7 +674,6 @@ export default class Arcade extends Phaser.Scene {
       if (name === "goblin") this._musicGoblinHit.play();
       else if (name === "skeleton") this._musicSkeletonHit.play();
 
-      // TEMPO DI RECUPERO DEL NEMICO (Immortalità temporanea)
       const recoveryTime = name === "minotaur" ? 800 : 500;
 
       this.time.delayedCall(recoveryTime, () => {
