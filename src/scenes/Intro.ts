@@ -249,7 +249,7 @@ export default class Intro extends Phaser.Scene {
     this._creditsContainer = this.add.container(0, 0);
     const bg = this.add.rectangle(this.scale.width/2, this.scale.height/2, this.scale.width, this.scale.height, 0x000000, 0.9).setInteractive();
     
-    const textContent = `TEAM MANAGER\nVito Daniele Di Michele\n\nCODING\nFrancesco Iannarella\nAndrea Pandolfi\nVito Daniele Di Michele\n\nGRAFICA\nFrancesco MaZZeo\nMarco Polisciano\nMario Morelli\n\nSUPERVISORI\nFabio Naponiello\nSimone Fasulo`;
+    const textContent = `TEAM MANAGER\nVito Daniele Di Michele\n\nCODING\nFrancesco Iannarella\nAndrea Pandolfi\nVito Daniele Di Michele\n\nGRAFICA\nFrancesco Mazzeo\nMarco Polisciano\nMario Morelli\n\nSUPERVISORI\nFabio Naponiello\nSimone Fasulo`;
     
     const creditsText = this.add.text(this.scale.width/2, this.scale.height + 100, textContent, {
         fontFamily: "MaleVolentz", fontSize: "30px", align: "center"
