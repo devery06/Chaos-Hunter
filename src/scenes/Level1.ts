@@ -247,7 +247,6 @@ export default class Level1 extends Phaser.Scene {
           this._mob_skeleton.forEach(s => { if (s.active && !s.getData("dead")) activeEnemies++; });
           if (activeEnemies === 0) {
               this._levelFinished = true;
-              console.log("VITTORIA!");
               this.time.delayedCall(4000, () => {
                     this.sound.stopAll();
                     const gameplay = this.scene.get("GamePlay") as any;

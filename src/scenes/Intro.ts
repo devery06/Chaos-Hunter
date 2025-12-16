@@ -243,37 +243,79 @@ export default class Intro extends Phaser.Scene {
 
   // --- SOTTOMENU: CREDITS ---
 
-  openCredits() {
+ openCredits() {
     this._mainMenuContainer.setVisible(false);
     
     this._creditsContainer = this.add.container(0, 0);
-    const bg = this.add.rectangle(this.scale.width/2, this.scale.height/2, this.scale.width, this.scale.height, 0x000000, 0.9).setInteractive();
+    // Sfondo leggermente più scuro per leggere meglio il testo piccolo
+    const bg = this.add.rectangle(this.scale.width/2, this.scale.height/2, this.scale.width, this.scale.height, 0x000000, 0.95).setInteractive();
     
-    const textContent = `TEAM MANAGER\nVito Daniele Di Michele\n\nCODING\nFrancesco Iannarella\nAndrea Pandolfi\nVito Daniele Di Michele\n\nGRAFICA\nFrancesco Mazzeo\nMarco Polisciano\nMario Morelli\n\nSUPERVISORI\nFabio Naponiello\nSimone Fasulo`;
+    // Testo aggiornato per coincidere con la Console e il Copyright
+    const textContent = 
+        "🛡️ CHAOS HUNTER - DEMO 2025 🛡️\n\n" +
+        "Developed by IIS Mattei Eboli\n\n" +
+        "--------------------------------\n\n" +
+        "--- CODING ---\n" +
+        "Vito Daniele Di Michele\n" +
+        "Francesco Iannarella\n" +
+        "Andrea Pandolfi\n" +
+        "Mario Morelli\n\n" +
+        "--- ART & GRAPHICS ---\n" +
+        "Francesco Mazzeo\n" +
+        "Marco Polisciano\n\n" +
+        "--- SUPERVISIONE ---\n" +
+        "Prof. Fabio Naponiello\n" +
+        "Prof. Simone Fasulo\n\n" +
+        "--- EVENTO ---\n" +
+        "Phaser Game Jam 2025\n\n" +
+        "================================\n\n" +
+        "CREDITS & LICENSES\n\n" +
+        "--- COPYRIGHT ---\n" +
+        "Questo videogioco è un'opera originale\n" +
+        "realizzata dagli studenti dell'Istituto\n" +
+        "Tecnico Superiore IIS Mattei Eboli.\n\n" +
+        "Il codice sorgente e i modelli originali\n" +
+        "sono © 2025 degli autori sopra citati.\n" +
+        "Tutti i diritti riservati.\n\n" +
+        "È vietata la riproduzione, distribuzione\n" +
+        "o utilizzo non autorizzato senza il\n" +
+        "permesso degli autori.\n\n" +
+        "--- CONTATTI ---\n" +
+        "Per uso commerciale o libero:\n" +
+        "dmvitodaniele06@gmail.com\n\n\n" +
+        "Grazie per aver giocato!";
     
-    const creditsText = this.add.text(this.scale.width/2, this.scale.height + 100, textContent, {
-        fontFamily: "MaleVolentz", fontSize: "30px", align: "center"
+    const creditsText = this.add.text(this.scale.width/2, this.scale.height + 50, textContent, {
+        fontFamily: "MaleVolentz", 
+        fontSize: "24px", 
+        align: "center",
+        color: "#a8ff78" 
     }).setOrigin(0.5, 0);
 
     this._creditsContainer.add([bg, creditsText]);
 
+    // Calcolo quanto deve scorrere in alto in base alla lunghezza del testo
+    const endY = -(creditsText.height + 100);
+
     this.tweens.add({
         targets: creditsText,
-        y: -600,
-        duration: 15000,
+        y: endY,
+        duration: 25000, // Ho aumentato la durata (più lento) perché c'è molto testo da leggere
         ease: 'Linear',
         onComplete: () => {
             this.closeCredits();
         }
     });
 
+    // Cliccando si chiude subito
     bg.on('pointerdown', () => this.closeCredits());
   }
 
-  closeCredits() {
+closeCredits() {
       if (this._creditsContainer) {
         this._soundBack.play();
         this._creditsContainer.destroy();
+        this._creditsContainer = undefined; // Importante resettare la variabile
         this._mainMenuContainer.setVisible(true);
       }
   }

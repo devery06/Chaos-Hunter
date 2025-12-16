@@ -18,9 +18,7 @@ export default class GamePlay extends Phaser.Scene {
         this.loadLevel(this.currentLevel);
     }
 
-    private loadLevel(level: number) {
-        console.log("Caricamento livello: " + level);
-        
+    private loadLevel(level: number) {        
         // Ferma le scene precedenti se necessario
         this.scene.stop("Village");
         this.scene.stop("Forest");

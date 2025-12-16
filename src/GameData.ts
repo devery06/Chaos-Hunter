@@ -80,11 +80,13 @@ export let GameData: gameData = {
     { name: "vampire", path: "assets/images/lv3_castello/lvl3_castello/mob_vampire/vampire.png", width: 57, height: 128, frames: 72 },
 
     //Final_boss_P1 
-    { name: "FinalBossP1", path: "assets/images/lv3_castello/lvl3_castello/mob_boss/FinalBossP1.png", width: 160, height: 128, frames: 119 },
     
     //Final_boss_P2
     { name: "FinalBossP2", path: "assets/images/lv3_castello/lvl3_castello/mob_boss/FinalBossP2.png", width: 228, height: 160, frames: 110 },
     */
+
+    { name: "FinalBossP1", path: "assets/images/lv3_castello/lvl3_castello/mob_boss/FinalBossP1.png", width: 160, height: 128, frames: 119 },
+
     //NPC
     { name: "barkeep", path: "assets/images/npc/barkeep.png", width: 34, height: 34, frames: 5 },
     { name: "barmaid", path: "assets/images/npc/barmaid.png", width: 34, height: 34, frames: 5 },
@@ -145,7 +147,7 @@ export let GameData: gameData = {
 
   ],
   
-  atlas: [{ key: "assets", imagepath: "assets/images/breakout.png", jsonpath: "assets/images/breakout.json"} ],
+  //atlas: [{ key: "assets", imagepath: "assets/images/breakout.png", jsonpath: "assets/images/breakout.json"} ],
   
   sounds: [
     //menu
@@ -250,7 +252,7 @@ export let GameData: gameData = {
 
   scripts: [],
   fonts: [{key:"ralewayRegular", path:"assets/fonts/raleway.regular.ttf",type:"truetype"},
-    {key:"MaleVolentz", path:"assets/fonts/Malevolentz.regular.ttf",type:"truetype"}
+    //{key:"MaleVolentz", path:"assets/fonts/Malevolentz.regular.ttf",type:"truetype"}
   ],
   webfonts: [ { key: 'Nosifer' }, { key: 'Roboto' }, { key: 'Press+Start+2P' }, { key: 'Rubik+Doodle+Shadow' }, { key: 'Rubik+Glitch' },
               { key: 'Bytesized' }

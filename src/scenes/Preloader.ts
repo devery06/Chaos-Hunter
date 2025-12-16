@@ -15,7 +15,6 @@ export default class Preloader extends Phaser.Scene {
   }
 
   init() {
-    console.log("Preloader init");
         
     this._image = this.add
       .image(
@@ -45,7 +44,6 @@ export default class Preloader extends Phaser.Scene {
 
   preload() {
 
-    console.log("Preloader preload");
     this.cameras.main.setBackgroundColor(GameData.globals.bgColor);
     this._progress = this.add.graphics();
     this.loadAssets();

@@ -12,7 +12,7 @@
     "format": "prettier --check src/scripts/**",
     "format:write": "prettier --write src/scripts/**",
     "predeploy": "npm run build",
-  "deploy": "gh-pages -d public"
+    "deploy": "gh-pages -d public -r https://github.com/devery06/Chaos-Hunter.git"
   },
   "keywords": [
     "Phaser",

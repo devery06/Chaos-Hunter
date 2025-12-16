@@ -1,4 +1,3 @@
-import { Collision } from "matter";
 import Phaser from "phaser";
 
 export default class Village extends Phaser.Scene {
@@ -17,6 +16,9 @@ export default class Village extends Phaser.Scene {
   private _textBoxVillager02: Phaser.GameObjects.Text; 
   private _textBoxSharko: Phaser.GameObjects.Text;
   
+  // Grafica per i box di dialogo (Sfondo tondo)
+  private _graphics: Phaser.GameObjects.Graphics;
+
   private _keySpace: Phaser.Input.Keyboard.Key;
   
   // DIALOGHI FABBRO
@@ -82,10 +84,8 @@ export default class Village extends Phaser.Scene {
       key: "Village",
     });
   }
+
   createMuteButton() {
-    // 1. Logica Frame: 
-    // Se è muto (true) -> Frame 0
-    // Se c'è audio (false) -> Frame 1
     const currentFrame = this.sound.mute ? 0 : 1; 
     
     this._muteBtn = this.add.sprite(this.scale.width - 160, 40, 'icon', currentFrame)
@@ -95,46 +95,43 @@ export default class Village extends Phaser.Scene {
       .setDepth(1000);
   
     this._muteBtn.on('pointerdown', () => {
-      // 2. Invertiamo lo stato dell'audio
       this.sound.mute = !this.sound.mute;
-      
-      // 3. Aggiorniamo l'icona in base al NUOVO stato
       const newFrame = this.sound.mute ? 1 : 0;
       this._muteBtn.setFrame(newFrame);
     });
   }
 
   create() {
-        // MENU BUTTON
-        const menuBtn = this.add
-        .text(this.scale.width - 80, 40, "MENU", {
-          fontFamily: "MaleVolentz",
-          fontSize: "30px",
-          color: "#ffffff",
-        })
-        .setOrigin(0.5)
-        .setDepth(1000)
-        .setStroke("#000000", 4)
-        .setScrollFactor(0)
-        .setInteractive({ useHandCursor: true })
-        .on("pointerover", () => {
-          menuBtn.setColor("#ff0000");
-        })
-        .on("pointerout", () => {
-          menuBtn.setColor("#ffffff"); 
-        })
-        .on("pointerdown", () => {
-          this.sound.stopAll();
-          this.scene.stop();
-          if (this.scene.get("Hud").scene.isActive()) {
-            this._blacksmithTextCount = 0;
-            this.scene.stop("Hud");
-          }
-          if (this.scene.get("GamePlay").scene.isActive()) {
-            this.scene.stop("GamePlay");
-          }
-          this.scene.start("Intro"); 
-        });
+    // MENU BUTTON
+    const menuBtn = this.add
+    .text(this.scale.width - 80, 40, "MENU", {
+      fontFamily: "MaleVolentz",
+      fontSize: "30px",
+      color: "#ffffff",
+    })
+    .setOrigin(0.5)
+    .setDepth(1000)
+    .setStroke("#000000", 4)
+    .setScrollFactor(0)
+    .setInteractive({ useHandCursor: true })
+    .on("pointerover", () => {
+      menuBtn.setColor("#ff0000");
+    })
+    .on("pointerout", () => {
+      menuBtn.setColor("#ffffff"); 
+    })
+    .on("pointerdown", () => {
+      this.sound.stopAll();
+      this.scene.stop();
+      if (this.scene.get("Hud").scene.isActive()) {
+        this._blacksmithTextCount = 0;
+        this.scene.stop("Hud");
+      }
+      if (this.scene.get("GamePlay").scene.isActive()) {
+        this.scene.stop("GamePlay");
+      }
+      this.scene.start("Intro"); 
+    });
 
     this._keySpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this._textControll = false;
@@ -152,31 +149,31 @@ export default class Village extends Phaser.Scene {
     this._playerBody = this._player.body as Phaser.Physics.Arcade.Body;
     this._player.setCollideWorldBounds(true).setGravity(0, 5000).setDepth(10);
     this.physics.add.collider(this._player, ground);
+    
     // Blacksmith
     this._blacksmith = this.physics.add.sprite(1800, 590, "blacksmith").setScale(1.5).setSize(66, 64);
     this._blacksmithBody = this._blacksmith.body as Phaser.Physics.Arcade.Body;
     this._blacksmithBody.setImmovable(true);
 
-    // BARMAID (Aggiornato: X=980, Scale=3.2)
+    // BARMAID
     this._barmaid = this.physics.add.sprite(980, 710, "barmaid").setScale(3.2);
     this._barmaidBody = this._barmaid.body as Phaser.Physics.Arcade.Body;
     this._barmaidBody.setImmovable(true);
     this._barmaidBody.setAllowGravity(false); 
 
-    // VILLAGER 02 (Aggiornato: X=450, Scale=3.2)
+    // VILLAGER 02
     this._villager02 = this.physics.add.sprite(450, 710, "villager_02").setScale(3.2); 
     this._villager02Body = this._villager02.body as Phaser.Physics.Arcade.Body;
     this._villager02Body.setImmovable(true);
     this._villager02Body.setAllowGravity(false); 
 
-    // Stairs Zone per salire dal fabbro
+    // Stairs Zone
     this._stairsZone = this.add.zone(1545, 734, 320, 190);
-    // Aggiungo un corpo fisico invisibile dopo le scale
     const topFloor = this.add.rectangle(1970, 647, 500, 20, 0x00ff00, 0); 
     this.physics.add.existing(topFloor, true);
     const topFloorBody = topFloor.body as Phaser.Physics.Arcade.Body;
-    topFloorBody.checkCollision.left = false; //disabilito le collisioni a sinistra 
-    topFloorBody.checkCollision.down = false; //disabilito le collisioni al di sotto
+    topFloorBody.checkCollision.left = false;
+    topFloorBody.checkCollision.down = false;
     this.physics.add.collider(this._player, topFloor);
     this.physics.world.enable(this._stairsZone);
     (this._stairsZone.body as Phaser.Physics.Arcade.Body).setAllowGravity(false);
@@ -186,7 +183,6 @@ export default class Village extends Phaser.Scene {
     this._cursors = this.input.keyboard.createCursorKeys();
     this.physics.world.setBounds(0, -40, 2100, this.scale.height);
 
-    // La camera si muove insieme al giocatore
     let mainCamera = this.cameras.main;
     mainCamera.setBounds(0, 0, 2100, 800);
     mainCamera.startFollow(this._player).setFollowOffset(0, 0);
@@ -196,14 +192,18 @@ export default class Village extends Phaser.Scene {
     if (!this.sound.get("village_theme") || !this.sound.get("village_theme").isPlaying) this.sound.play("village_theme", { loop: true, volume: 0.2 });
     this.createMuteButton();
 
-    // --- SETUP TESTI (Nuovo Stile Grigio/Trasparente) ---
-    // 'rgba(50, 50, 50, 0.8)' per un grigio scuro semitrasparente
+    // --- SETUP GRAFICA SFONDO DIALOGHI ---
+    // Questo oggetto si occuperà di disegnare il rettangolo tondo dietro il testo
+    this._graphics = this.add.graphics().setDepth(99); // Depth 99 (testo è 100)
+
+    // --- SETUP TESTI ---
+    // NOTA: Ho rimosso 'backgroundColor' perché lo disegniamo noi tondo con _graphics
     const boxStyle = {
         fontSize: "20px", 
         color: "#ffffff", 
         align: "center", 
         wordWrap: { width: 400 },
-        backgroundColor: 'rgba(50, 50, 50, 0.8)',
+        // backgroundColor rimosso per permettere bordi tondi
         padding: { x: 10, y: 10 }
     };
     
@@ -211,7 +211,7 @@ export default class Village extends Phaser.Scene {
     this._textBox = this.add.text(0, 0, "Premi spazio per parlare", {
         fontSize: "20px", color: "#ffffff", align: "center", wordWrap: { width: 400 },
         stroke: "#000000", strokeThickness: 3
-      }).setOrigin(0.5, 0.5).setVisible(false).setDepth(100);
+    }).setOrigin(0.5, 0.5).setVisible(false).setDepth(100);
 
     // 2. Dialogo Fabbro
     this._textBoxBlacksmith = this.add.text(1800, 700, this._text[0], boxStyle)
@@ -295,18 +295,17 @@ export default class Village extends Phaser.Scene {
     // --- INTERAZIONI ---
 
     const playerX = this._player.x;
-    let showingPrompt = false; // Flag per capire se sono vicino a QUALCUNO
+    let showingPrompt = false; 
 
     // 1. INTERAZIONE FABBRO
     if (playerX > this._blacksmith.x - 80 && playerX < this._blacksmith.x + 80) {
-        showingPrompt = true; // Sono nel range!
+        showingPrompt = true; 
         
-        // Se non sto parlando, mostro "Premi spazio"
         if (!this._textBoxBlacksmith.visible) {
             this._textBox.setVisible(true);
             this._textBox.setPosition(this._blacksmith.x, this._blacksmith.y - 100);
         } else {
-            this._textBox.setVisible(false); // Nascondo prompt se parlo
+            this._textBox.setVisible(false);
         }
 
         if (this._keySpace.isDown) {
@@ -330,9 +329,8 @@ export default class Village extends Phaser.Scene {
     } 
     // 2. INTERAZIONE BARMAID
     else if (playerX > this._barmaid.x - 80 && playerX < this._barmaid.x + 80) {
-        showingPrompt = true; // Sono nel range!
+        showingPrompt = true; 
 
-        // Nascondo gli altri box per pulizia
         this._textBoxBlacksmith.setVisible(false);
         this._textBoxSharko.setVisible(false);
         this._textBoxVillager02.setVisible(false);
@@ -351,14 +349,13 @@ export default class Village extends Phaser.Scene {
                 let barmaidIndex = 0;
                 if (this._blacksmithTextCount >= 5 && this._blacksmithTextCount < 15) barmaidIndex = 1;
                 else if (this._blacksmithTextCount >= 15) barmaidIndex = 2;
-                console.log(barmaidIndex);
                 this._textBoxBarmaid.setText(this._textBarmaid[barmaidIndex]);
             }
         }
     }
     // 3. INTERAZIONE VILLAGER 02
     else if (playerX > this._villager02.x - 80 && playerX < this._villager02.x + 80) {
-        showingPrompt = true; // Sono nel range!
+        showingPrompt = true; 
 
         this._textBoxBlacksmith.setVisible(false);
         this._textBoxSharko.setVisible(false);
@@ -384,7 +381,7 @@ export default class Village extends Phaser.Scene {
     }
     // 4. INTERAZIONE SHARKO
     else if (playerX > 524 && playerX < 780) {
-        showingPrompt = true; // Sono nel range!
+        showingPrompt = true; 
 
         if (!this._textBoxSharko.visible) {
             this._textBox.setVisible(true);
@@ -398,15 +395,45 @@ export default class Village extends Phaser.Scene {
         }
     }
 
-    // --- CHIUSURA DIALOGHI SE TI ALLONTANI ---
     if (!showingPrompt) {
         this._textBox.setVisible(false);
         
-        // Se mi allontano, chiudo tutti i dialoghi aperti
         this._textBoxBarmaid.setVisible(false);
         this._textBoxVillager02.setVisible(false);
         this._textBoxBlacksmith.setVisible(false);
         this._textBoxSharko.setVisible(false);
     }
+
+    // --- AGGIORNAMENTO SFONDO DIALOGHI ---
+    // Questo disegna il rettangolo tondo dietro al testo attivo
+    this.updateDialogBackground();
+  }
+
+  // Funzione helper per disegnare il box arrotondato
+  updateDialogBackground() {
+      this._graphics.clear(); // Pulisce il frame precedente
+
+      // Controlla quale testo è visibile e disegna lo sfondo solo per quello
+      if (this._textBoxBlacksmith.visible) this.drawRoundedRectForText(this._textBoxBlacksmith);
+      else if (this._textBoxBarmaid.visible) this.drawRoundedRectForText(this._textBoxBarmaid);
+      else if (this._textBoxVillager02.visible) this.drawRoundedRectForText(this._textBoxVillager02);
+      else if (this._textBoxSharko.visible) this.drawRoundedRectForText(this._textBoxSharko);
+  }
+
+  drawRoundedRectForText(textObj: Phaser.GameObjects.Text) {
+      const padding = 20;
+      // Calcolo coordinate del rettangolo in base alla posizione del testo (che è centrato)
+      const x = textObj.x - (textObj.width / 2) - (padding / 2);
+      const y = textObj.y - (textObj.height / 2) - (padding / 2);
+      const w = textObj.width + padding;
+      const h = textObj.height + padding;
+
+      // Sfondo Grigio Scuro (0x323232 è circa rgb(50,50,50))
+      this._graphics.fillStyle(0x323232, 0.8);
+      this._graphics.fillRoundedRect(x, y, w, h, 20); // 20 è il raggio dell'angolo tondo
+
+      // Bordo Bianco Spesso 2px
+      this._graphics.lineStyle(2, 0xffffff, 1);
+      this._graphics.strokeRoundedRect(x, y, w, h, 20);
   }
 }

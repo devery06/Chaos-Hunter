@@ -18,14 +18,11 @@ export default class Boot extends Phaser.Scene {
   //il metodo init viene chiamato all'inizio della scena
   //in questo caso non esegue nessuna operazione
   init() {
-    console.log("Boot init");
   }
 
   //il metodo preload viene chiamato dopo il metodo init
   //nel metodo preload vengono caricati gli assets che servono per il caricamento della scena successiva
   preload() {
-
-    console.log("Boot preload");
     //settiamo il colore di sfondo della scena
     this.cameras.main.setBackgroundColor(GameData.globals.bgColor);
     //precarichiamo l'immagine del logo
@@ -43,8 +40,6 @@ export default class Boot extends Phaser.Scene {
 
   //il metodo create viene chiamato dopo il metodo preload
   create() {
-
-    console.log("Boot create");
     //fermiamo la scena corrente
     this.scene.stop("Boot");
     //richiamiamo il metodo start della scena Preloader per
