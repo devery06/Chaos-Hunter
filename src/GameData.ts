@@ -41,7 +41,7 @@ export let GameData: gameData = {
     { name: "boss_lvl1-fix", path: "assets/images/lv1_forest/mob_boss/boss_lvl1-fix.png", width: 128, height: 136, frames: 65 },
     { name: "boss_lvl1", path: "assets/images/lv1_forest/mob_boss/boss_lvl1.png", width: 156, height: 156, frames: 65 },
 
-
+    /* NON ANCORA IMPLEMENTATI
     //ENEMY LVL 2
     //monster
     { name: "monster_attack1", path: "assets/images/lv2_foresta/lvl2_foresta/mob_monster/monster_attack1.png", width: 96, height: 96, frames: 6 },
@@ -84,7 +84,7 @@ export let GameData: gameData = {
     
     //Final_boss_P2
     { name: "FinalBossP2", path: "assets/images/lv3_castello/lvl3_castello/mob_boss/FinalBossP2.png", width: 228, height: 160, frames: 110 },
-
+    */
     //NPC
     { name: "barkeep", path: "assets/images/npc/barkeep.png", width: 34, height: 34, frames: 5 },
     { name: "barmaid", path: "assets/images/npc/barmaid.png", width: 34, height: 34, frames: 5 },
@@ -123,7 +123,7 @@ export let GameData: gameData = {
     { name: "text4", path: "assets/images/textbox/text4.png" },
      */
 
-    //The Dawn
+    /*The Dawn INUTILIZZATO 
     { name: "1", path: "assets/images/The_Dawn/Layers/1.png" },
     { name: "2", path: "assets/images/The_Dawn/Layers/2.png" },
     { name: "3", path: "assets/images/The_Dawn/Layers/3.png" },
@@ -132,7 +132,8 @@ export let GameData: gameData = {
     { name: "6", path: "assets/images/The_Dawn/Layers/6.png" },
     { name: "7", path: "assets/images/The_Dawn/Layers/7.png" },
     { name: "8", path: "assets/images/The_Dawn/Layers/8.png" },
-
+    */
+  
     //boss e player intro
     { name: "FinalBoss_intro", path: "assets/images/menu/FinalBoss_intro.png" },
     { name: "pg_intro", path: "assets/images/menu/pg_intro.png" },
