@@ -2,7 +2,7 @@
   "name": "phaser-project-template",
   "version": "3.87.0",
   "description": "Phaser 3.87.0 starter template with TypeScript and webpack.",
-  "homepage": "https://github.com/yandeu/phaser-project-template#readme",
+  "homepage": "https://devery06.github.io/chaoshunter",
   "main": "index.js",
   "scripts": {
     "start": "webpack serve --open --config webpack/webpack.dev.js",
@@ -10,7 +10,9 @@
     "bundle": "npm run build",
     "serve": "serve dist",
     "format": "prettier --check src/scripts/**",
-    "format:write": "prettier --write src/scripts/**"
+    "format:write": "prettier --write src/scripts/**",
+    "predeploy": "npm run build",
+  "deploy": "gh-pages -d public"
   },
   "keywords": [
     "Phaser",
@@ -43,6 +45,7 @@
     "@yandeu/prettier-config": "^0.0.4",
     "copy-webpack-plugin": "^12.0.2",
     "css-loader": "^7.1.2",
+    "gh-pages": "^6.3.0",
     "html-webpack-plugin": "^5.6.3",
     "javascript-obfuscator": "^4.1.1",
     "mime-types": "^2.1.35",

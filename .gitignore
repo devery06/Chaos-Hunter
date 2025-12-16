@@ -1,16 +1,13 @@
 #folders
 node_modules/*
 dist/*
-public/*
 typeings/*
-webpack/*
 
 #terminal
 npm
 
 #json
 package-lock.json
-package.json
 tsconfig.json
 
 #src
